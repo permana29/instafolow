@@ -60,12 +60,12 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
    
    ```json
     {
-     "csrftoken":                        "isi_dengan_csrftoken",
-     "ds_user_id":                       "isi_dengan_ds_user_id",
-     "sessionid":                        "isi_dengan_sessionid"
-   
-     }
+   "csrftoken": "isi_dengan_csrftoken",
+   "ds_user_id": "isi_dengan_ds_user_id",
+   "sessionid": "isi_dengan_sessionid"
+    }
     ```
+   
 5. **Jalan kan script :**
    ```bahs
    python insta.py

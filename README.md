@@ -18,6 +18,7 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
 ## 📂 Struktur Repositori
 📂 insta.py │── Skrip utama bot   
 📂 usernames.txt │── Daftar username populer untuk di-follow
+
 📂 cookies.json │── File sesi login Instagram
 
 # Dokumentasi proyek

@@ -1,6 +1,6 @@
 # Insta Follow Bot
 
-![Insta Follow](https://your-image-url.com)  *(Ganti dengan URL gambar Anda di GitHub)*
+![Insta Follow]([https://your-image-url.com](https://raw.githubusercontent.com/permana29/instafolow/refs/heads/main/Screenshot_20250325_105124.jpg))  *
 
 ## 📌 Tentang
 

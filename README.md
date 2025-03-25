@@ -24,6 +24,8 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
 
 ---
 
+---
+
 ## 🚀 Instalasi di Android
 
 1. **Unduh & Instal Termux**  
@@ -34,29 +36,36 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
    pkg update && pkg upgrade
    pkg install python
    pip install requests rich
+   
+3. **Clone Repository & Masuk ke Direktori :**
 
-3. Clone Repository & Masuk ke Direktori :
-```bash
-git clone (https://github.com/permana29/instafolow.git)
-cd insta-follow-bot
+   ```bash
+   git clone https://github.com/permana29/instafolow.git
+   cd insta-follow-bot
 
-4. Tambahkan cookies.json
-Gunakan Kiwi Browser dengan Developer Tools untuk mendapatkan csrftoken, ds_user_id, dan sessionid:
+4. **Tambahkan cookies.json**
+    Gunakan Kiwi Browser dengan         Developer Tools untuk               mendapatkan csrftoken,              ds_user_id, dan sessionid:
 
-Buka instagram.com di Kiwi Browser.
+    Buka instagram.com di Kiwi          Browser.
 
-Login ke akun Instagram Anda.
+    Login ke akun Instagram Anda.
 
-Buka Developer Tools (Inspect Element).
+    Buka Developer Tools (Inspect       Element).
 
-Pergi ke Application → Storage → Cookies → www.instagram.com.
+    Pergi ke Application → Storage     → Cookies → www.instagram.com.
 
-Salin nilai csrftoken, ds_user_id, dan sessionid.
+    Salin nilai csrftoken,              ds_user_id, dan sessionid.
 
-Buat file cookies.json dan isi seperti berikut:
+   Buat file cookies.json dan isi      seperti berikut:
 
-{
-  "csrftoken": "isi_dengan_csrftoken",
-  "ds_user_id": "isi_dengan_ds_user_id",
-  "sessionid": "isi_dengan_sessionid"
-}
+   {
+   
+     "csrftoken":                        "isi_dengan_csrftoken",
+     "ds_user_id":                       "isi_dengan_ds_user_id",
+     "sessionid":                        "isi_dengan_sessionid"
+   
+   }
+
+5. **Jalan kan script :**
+   ```bahs
+   python insta.py

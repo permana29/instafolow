@@ -1,6 +1,6 @@
 # Insta Follow Bot
 
-![Insta Follow]([xx](https://github.com/permana29/instafolow/blob/main/Screenshot_20250325_105124.jpg)) 
+![Insta Follow](https://github.com/permana29/instafolow/blob/main/Screenshot_20250325_105124.jpg) 
 
 ## 📌 Tentang
 

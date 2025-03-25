@@ -69,3 +69,5 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
 5. **Jalan kan script :**
    ```bahs
    python insta.py
+
+MIT License. Bebas digunakan, tetapi gunakan dengan tanggung jawab sendiri.

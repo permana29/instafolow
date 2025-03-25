@@ -36,5 +36,7 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
    pip install requests rich
 
 3. Clone Repository & Masuk ke Direktori :
-git clone [https://github.com/username/insta-follow-bot.git](https://github.com/permana29/instafolow.git)
+```bash
+   git clone (https://github.com/permana29/instafolow.git)
 cd insta-follow-bot
+

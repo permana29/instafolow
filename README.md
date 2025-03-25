@@ -37,6 +37,26 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
 
 3. Clone Repository & Masuk ke Direktori :
 ```bash
-   git clone (https://github.com/permana29/instafolow.git)
+git clone (https://github.com/permana29/instafolow.git)
 cd insta-follow-bot
 
+4. Tambahkan cookies.json
+Gunakan Kiwi Browser dengan Developer Tools untuk mendapatkan csrftoken, ds_user_id, dan sessionid:
+
+Buka instagram.com di Kiwi Browser.
+
+Login ke akun Instagram Anda.
+
+Buka Developer Tools (Inspect Element).
+
+Pergi ke Application → Storage → Cookies → www.instagram.com.
+
+Salin nilai csrftoken, ds_user_id, dan sessionid.
+
+Buat file cookies.json dan isi seperti berikut:
+
+{
+  "csrftoken": "isi_dengan_csrftoken",
+  "ds_user_id": "isi_dengan_ds_user_id",
+  "sessionid": "isi_dengan_sessionid"
+}

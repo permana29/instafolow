@@ -16,9 +16,25 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
 ---
 
 ## 📂 Struktur Repositori
-📂 insta.py │── Skrip utama bot   
+📂 insta.py │── Skrip utama bot 
+
 📂 usernames.txt │── Daftar username populer untuk di-follow
 
 📂 cookies.json │── File sesi login Instagram
 
-# Dokumentasi proyek
+---
+
+## 🚀 Instalasi di Android
+
+1. **Unduh & Instal Termux**  
+   Jika belum memiliki Termux, unduh dari [F-Droid](https://f-droid.org/en/packages/com.termux/) atau Play Store.
+
+2. **Instal Python & Dependensi**  
+   ```bash
+   pkg update && pkg upgrade
+   pkg install python
+   pip install requests rich
+
+3. Clone Repository & Masuk ke Direktori :
+git clone [https://github.com/username/insta-follow-bot.git](https://github.com/permana29/instafolow.git)
+cd insta-follow-bot

@@ -1,1 +1,5 @@
-
+{
+    "csrftoken": "input_csrftoken",
+    "ds_user_id": "input_ds_user_id",
+    "sessionid": "sessionid"
+}

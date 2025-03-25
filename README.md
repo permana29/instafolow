@@ -57,15 +57,15 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
     Salin nilai csrftoken,              ds_user_id, dan sessionid.
 
    Buat file cookies.json dan isi      seperti berikut:
-
-   {
    
+   ```json
+    {
      "csrftoken":                        "isi_dengan_csrftoken",
      "ds_user_id":                       "isi_dengan_ds_user_id",
      "sessionid":                        "isi_dengan_sessionid"
    
-   }
-
+     }
+    ```
 5. **Jalan kan script :**
    ```bahs
    python insta.py

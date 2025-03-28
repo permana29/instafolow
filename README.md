@@ -45,6 +45,7 @@ Gunakan dengan bijak! Jangan menyalahgunakan fitur ini untuk spam atau aktivitas
 3. **Clone Repository & Masuk ke Direktori :**
 
    ```bash
+   pkg install git
    git clone https://github.com/permana29/instafolow.git
    cd insta-follow-bot
 

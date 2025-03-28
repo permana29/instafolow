@@ -3,6 +3,8 @@ import json
 import os
 import time
 import random
+import signal
+import sys
 from rich.console import Console
 
 console = Console()
@@ -19,23 +21,26 @@ Auto Followers & Unfollow by @0x29p
 
 COOKIES_FILE = "cookies.json"
 USERNAMES_FILE = "usernames.txt"
+follow_count = 0
+unfollow_count = 0
 
+# --- Load Cookies ---
 if os.path.exists(COOKIES_FILE):
     with open(COOKIES_FILE, "r") as file:
         COOKIES = json.load(file)
 else:
-    print("❌ Cookies tidak ditemukan! Harap masukkan sessionid secara manual.")
+    console.print("❌ [bold red]Cookies tidak ditemukan! Harap masukkan sessionid secara manual.[/]")
     exit()
 
 SESSION_ID = COOKIES.get("sessionid")
 CSRF_TOKEN = COOKIES.get("csrftoken", "")
 
 if not SESSION_ID:
-    print("❌ Session ID tidak ditemukan dalam cookies.json! Pastikan valid.")
+    console.print("❌ [bold red]Session ID tidak ditemukan dalam cookies.json! Pastikan valid.[/]")
     exit()
 
 HEADERS = {
-    "User-Agent": "Instagram 320.0.0.12 Android (30/9; 480dpi; 1080x1920; Samsung; SM-G991B; o1s; qcom; en_US)",
+    "User-Agent": "Instagram 320.0.0.12 Android",
     "Referer": "https://www.instagram.com/",
     "Accept-Language": "en-US,en;q=0.9",
     "Content-Type": "application/x-www-form-urlencoded",
@@ -47,118 +52,107 @@ session = requests.Session()
 session.cookies.set("sessionid", SESSION_ID, domain=".instagram.com")
 session.headers.update(HEADERS)
 
+
+# Fungsi untuk menangani Ctrl+C
+def handle_ctrl_c(signal_received, frame):
+    global follow_count, unfollow_count
+
+    try:
+        username, user_id, followers, following = check_login()
+    except:
+        followers, following = "N/A", "N/A"
+
+    console.print("\n\n🛑 [bold red]Program dihentikan oleh pengguna (Ctrl+C).")
+    console.print(f"📊 Total akun yang di-follow: {follow_count}")
+    console.print(f"📊 Total akun yang di-unfollow: {unfollow_count}")
+    console.print(f"📌 Followers saat ini: {followers} | Following: {following}\n")
+
+    console.print("[bold cyan]👋 Keluar dari program...[/]")
+    time.sleep(2)
+    sys.exit(0)  # Keluar dari script
+
+# Menangani Ctrl+Z (kembali ke menu utama)
+def handle_ctrl_z(signal_received, frame):
+    global follow_count, unfollow_count
+
+    try:
+        username, user_id, followers, following = check_login()
+    except:
+        followers, following = "N/A", "N/A"
+
+    console.print("\n\n👋 [bold yellow]Program dihentikan oleh pengguna (Ctrl+Z).")
+    console.print(f"📊 Total akun yang di-follow: {follow_count}")
+    console.print(f"📊 Total akun yang di-unfollow: {unfollow_count}")
+    console.print(f"📌 Followers saat ini: {followers} | Following: {following}\n")
+
+    # Reset counter agar tidak menumpuk
+    follow_count = 0
+    unfollow_count = 0
+
+    console.print("[bold cyan]🔄 Kembali ke menu utama...[/]")
+    time.sleep(2)
+    main_menu()  # Kembali ke menu utama
+
+# Menetapkan signal handler
+signal.signal(signal.SIGINT, handle_ctrl_c)  # Ctrl+C untuk keluar
+signal.signal(signal.SIGTSTP, handle_ctrl_z)  # Ctrl+Z untuk kembali ke menu utama
+
+
+# --- Countdown Timer dengan output followers & following ---
 def countdown_timer(seconds):
-    """Menampilkan hitungan mundur sebelum eksekusi berikutnya."""
+    # Ambil data followers/following sekali sebelum countdown
+    try:
+        _, _, followers, following = check_login()
+    except:
+        followers, following = "N/A", "N/A"
     for remaining in range(seconds, 0, -1):
-        console.print(f"⏳ Menunggu {remaining} detik sebelum lanjut...", end="\r", style="bold cyan")
+        console.print(f"⏳ Menunggu {remaining} detik... (Followers: {followers}, Following: {following})", end="\r", style="bold cyan")
         time.sleep(1)
     console.print("\n", end="")
 
 def check_login():
     url = "https://i.instagram.com/api/v1/accounts/current_user/"
     response = session.get(url)
-
     if response.status_code == 200:
         try:
             data = response.json()
             username = data['user']['username']
             user_id = data['user']['pk']
-            followers = get_followers_count(user_id)
-            following = get_following_count(user_id)
-            
+            # Ambil stats untuk menampilkan followers/following
+            followers, following = get_user_stats(user_id)
             return username, user_id, followers, following
         except (json.JSONDecodeError, KeyError):
             pass
+    console.print("❌ [bold red]Session kadaluarsa! Update sessionid di cookies.json.[/]")
+    exit()
 
-    print("❌ Session kadaluarsa! Update sessionid di cookies.json.")
-    return None, None, None, None
-
-def get_followers_count(user_id):
+def get_user_stats(user_id):
     url = f"https://i.instagram.com/api/v1/users/{user_id}/info/"
     response = session.get(url)
     if response.status_code == 200:
         try:
             data = response.json()
-            return data["user"]["follower_count"]
+            return data["user"]["follower_count"], data["user"]["following_count"]
         except (json.JSONDecodeError, KeyError):
-            return "Tidak diketahui"
-    return "Gagal mengambil data"
+            pass
+    return "Tidak diketahui", "Tidak diketahui"
 
-def get_following_count(user_id):
-    url = f"https://i.instagram.com/api/v1/users/{user_id}/info/"
-    response = session.get(url)
-    if response.status_code == 200:
-        try:
-            data = response.json()
-            return data["user"]["following_count"]
-        except (json.JSONDecodeError, KeyError):
-            return "Tidak diketahui"
-    return "Gagal mengambil data"
+def show_user_info():
+    username, user_id, followers, following = check_login()
+    max_follow_limit = max(7500 - following, 0)
+    console.print(f"\n✅ [bold green]Login sebagai: {username}[/]")
+    console.print(f"👥 Followers: {followers} ➡️ Following: {following}")
+    console.print(f"📌 Maksimum yang bisa di-follow: {max_follow_limit} akun\n")
 
 def get_user_id(username):
     url = f"https://i.instagram.com/api/v1/users/web_profile_info/?username={username}"
     response = session.get(url)
-
     if response.status_code == 200:
         try:
-            data = response.json()
-            return data["data"]["user"]["id"]
+            return response.json()["data"]["user"]["id"]
         except (json.JSONDecodeError, KeyError):
-            print(f"❌ Gagal mendapatkan user ID untuk: {username}")
+            pass
     return None
-
-def show_max_follow_limit(username, user_id, followers, following):
-    max_follow_limit = max(7500 - following, 0)  # Instagram membatasi 7500 following
-
-    print(f"\n✅ Login sebagai: {username}")  
-    print(f"👥 Followers: {followers} ➡️ Following: {following}")  
-    print(f"📌 Maksimum yang bisa di-follow: {max_follow_limit} akun\n")
-
-def auto_follow_popular():
-    if not os.path.exists(USERNAMES_FILE):
-        print("❌ File usernames.txt tidak ditemukan! Harap buat file terlebih dahulu.")
-        return
-
-    with open(USERNAMES_FILE, "r") as file:
-        popular_accounts = [line.strip() for line in file.readlines() if line.strip()]
-
-    print(f"🔄 Memulai auto-follow untuk {len(popular_accounts)} akun populer...")
-
-    followed = 0
-    already_followed = 0
-
-    for username in popular_accounts:
-        user_id = get_user_id(username)
-        if user_id:
-            # Mengecek apakah sudah di-follow sebelumnya
-            check_url = f"https://i.instagram.com/api/v1/friendships/show/{user_id}/"
-            check_response = session.get(check_url)
-
-            if check_response.status_code == 200:
-                try:
-                    check_data = check_response.json()
-                    if check_data.get("following"):
-                        print(f"✅ Sudah ada di folowers: {username}")
-                        already_followed += 1
-                        continue
-                except json.JSONDecodeError:
-                    pass
-
-            # Jika belum di-follow, maka follow akun
-            url = f"https://i.instagram.com/api/v1/friendships/create/{user_id}/"
-            response = session.post(url)
-
-            if response.status_code == 200:
-                print(f"✅ Berhasil follow: {username}")
-                followed += 1
-            else:
-                error_message = response.json().get("message", "Gagal follow akun ini.")
-                print(f"❌ Gagal follow {username}: {error_message}")
-
-            # Menunggu dengan countdown
-            countdown_timer(random.randint(2, 10))  # Hindari spam
-
-    print(f"\n🎉 Selesai! Total {followed} akun baru di-follow, {already_followed} akun sudah di-follow sebelumnya.")
 
 def get_following_list(user_id):
     url = f"https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=200"
@@ -166,74 +160,146 @@ def get_following_list(user_id):
     if response.status_code == 200:
         try:
             data = response.json()
-            return [user["username"] for user in data["users"]]
+            usernames = [user["username"].lower() for user in data["users"]]
+            return usernames
         except (json.JSONDecodeError, KeyError):
-            return []
+            pass
     return []
 
-def unfollow_all():
-    username, user_id, _, following = check_login()
-    if not username:
-        return
-
+def is_following(username):
+    """Cek apakah akun sudah di-follow."""
+    _, user_id, _, _ = check_login()
     following_list = get_following_list(user_id)
-    total_following = len(following_list)
+    return username.lower() in following_list
 
-    if total_following == 0:
-        print("⚠️ Tidak ada akun yang sedang diikuti.")
-        return
+def auto_follow_popular():
+    global follow_count
+    show_user_info()
+    _, user_id, _, _ = check_login()
 
-    print(f"🔍 Mengambil daftar following... Total: {total_following} akun")
+    usernames_to_follow = ["0x29p"]
 
-    try:
-        num_unfollow = int(input(f"Masukkan jumlah unfollow (Maks {total_following}): "))
-    except ValueError:
-        print("❌ Input tidak valid! Masukkan angka.")
-        return
+    if os.path.exists(USERNAMES_FILE):
+        with open(USERNAMES_FILE, "r") as file:
+            usernames_from_file = [line.strip() for line in file.readlines() if line.strip()]
+            usernames_to_follow.extend(usernames_from_file)
 
-    if num_unfollow > total_following:
-        print(f"⚠️ Jumlah terlalu banyak, akan meng-unfollow semua akun yang tersedia.")
-        num_unfollow = total_following
+    console.print(f"🔄 Memulai auto-follow untuk {len(usernames_to_follow)} akun...\n")
 
-    unfollowed = 0
-    for username in following_list[:num_unfollow]:
-        user_id = get_user_id(username)
-        if user_id:
-            url = f"https://i.instagram.com/api/v1/friendships/destroy/{user_id}/"
+    for username in usernames_to_follow:
+        if is_following(username):
+            console.print(f"⏩ [bold yellow]Sudah follow: {username}, skip...[/]")
+            continue
+
+        uid = get_user_id(username)
+        if uid:
+            url = f"https://i.instagram.com/api/v1/friendships/create/{uid}/"
             response = session.post(url)
             if response.status_code == 200:
-                print(f"✅ Berhasil unfollow: {username}")
-                unfollowed += 1
+                follow_count += 1
+                console.print(f"✅ [bold green]Berhasil follow: {username}[/]")
             else:
-                print(f"❌ Gagal unfollow {username}: Terlalu banyak permintaan, coba lagi nanti.")
+                console.print(f"❌ [bold red]Gagal follow {username}[/]")
+            # timer akun baru
+            #countdown_timer(random.randint(10, 20))
+            #timer akun lama
+            countdown_timer(random.randint(5, 20))
+    console.print(f"\n✅ [bold green]Selesai! Total akun yang baru di-follow: {follow_count}[/]")
 
-        # Menunggu dengan countdown
-        countdown_timer(random.randint(2, 10))  # Hindari spam
+def auto_unfollow_all():
+    global unfollow_count
+    show_user_info()
+    _, user_id, _, _ = check_login()
+    following_list = get_following_list(user_id)
 
-    print(f"🎉 Selesai! Total {unfollowed} akun telah di-unfollow.")
+    if not following_list:
+        console.print("⚠️ [bold yellow]Tidak ada akun yang sedang diikuti.[/]")
+        return
+
+    console.print(f"🔄 Menghapus {len(following_list)} akun yang diikuti...\n")
+
+    for username in following_list:
+        if username.lower() == "0x29p":
+            console.print(f"🔒 [bold cyan]Instagram autor 0x29p (Skip di-unfollow)[/]")
+            continue  # Lewati akun 0x29p
+
+        uid = get_user_id(username)
+        if uid:
+            url = f"https://i.instagram.com/api/v1/friendships/destroy/{uid}/"
+            response = session.post(url)
+            if response.status_code == 200:
+                unfollow_count += 1
+                console.print(f"✅ [bold green]Unfollow: {username}[/]")
+            else:
+                console.print(f"❌ [bold red]Gagal unfollow {username}[/]")
+
+            countdown_timer(random.randint(5, 10))
+
+    console.print(f"\n✅ [bold green]Selesai! Total akun yang di-unfollow: {unfollow_count}[/]")
+
+def auto_unfollow_popular():
+    global unfollow_count
+    username, user_id, followers, following = check_login()
+
+    if not os.path.exists(USERNAMES_FILE):
+        console.print("❌ [bold red]File usernames.txt tidak ditemukan![/]")
+        return
+
+    with open(USERNAMES_FILE, "r") as file:
+        popular_accounts = [line.strip().lower() for line in file.readlines() if line.strip()]
+
+    # 🔄 Ambil ulang data following sebelum mulai menghapus
+    followers, following = get_user_stats(user_id)
+    console.print(f"📌 Update Followers: {followers} | Following: {following}")
+
+    following_list = get_following_list(user_id)
+    unfollow_targets = [username for username in popular_accounts if username in following_list]
+
+    console.print(f"🔄 Menghapus {len(unfollow_targets)} akun populer yang diikuti...\n")
+
+    for username in unfollow_targets:
+        if username.lower() == "0x29p":
+            console.print(f"🔒 [bold cyan]Instagram autor 0x29p (Skip di-unfollow)[/]")
+            continue  # Lewati akun 0x29p
+
+        uid = get_user_id(username)
+        if uid:
+            url = f"https://i.instagram.com/api/v1/friendships/destroy/{uid}/"
+            response = session.post(url)
+            if response.status_code == 200:
+                unfollow_count += 1
+                console.print(f"✅ [bold green]Unfollow: {username}[/]")
+            else:
+                console.print(f"❌ [bold red]Gagal unfollow {username}[/]")
+
+            countdown_timer(random.randint(3, 5))
+
+    # 🔄 Update data setelah semua akun dihapus
+    followers, following = get_user_stats(user_id)
+    console.print(f"\n✅ [bold green]Selesai! Total akun yang di-unfollow: {unfollow_count}[/]")
+    console.print(f"📌 Update Followers: {followers} | Following: {following}")
 
 def main_menu():
     banner()
-    username, user_id, followers, following = check_login()
-    if not username:
-        exit()
-
-    show_max_follow_limit(username, user_id, followers, following)  # Menampilkan jumlah maksimum yang bisa di-follow
+    show_user_info()
 
     while True:
-        print("\n📌 PILIH MENU 📌")
-        print("1️⃣ Auto-Follow Akun Populer")
-        print("2️⃣ Auto-Unfollow Semua Following")
-        print("3️⃣ Keluar")
+        console.print("\n📌[bold RED] PILIH MENU [/]📌")
+        console.print("1️⃣ [bold yellow] Auto-Followers - Spam Folow Akun Populer.[/]")
+        console.print("2️⃣ [bold yellow] Auto-Unfollow  - Hanya Akun Populer.[/] ")
+        console.print("3️⃣ [bold yellow] Auto-Unfollow  - Semua Following.[/] ")
+        console.print("4️⃣ [bold yellow] Keluar.[/]")
 
-        choice = input("Pilih menu: ")
+        choice = input("\033[1;31mPilih menu: \033[0m")
 
         if choice == "1":
             auto_follow_popular()
         elif choice == "2":
-            unfollow_all()
+            auto_unfollow_popular()
         elif choice == "3":
-            print("👋 Keluar dari program. Sampai jumpa lagi!")
+            auto_unfollow_all()
+        elif choice == "4":
+            console.print("👋 [bold yellow]Keluar dari program.[/]")
             break
 
 if __name__ == "__main__":

@@ -1,6 +1,11 @@
 # Insta Follow Bot
 
+#versi pertama
 ![Insta Follow](https://github.com/permana29/instafolow/blob/main/Screenshot_20250325_105124.jpg) 
+
+#versi kedua sudah auto update
+![Insta Follow](https://github.com/permana29/instafolow/blob/main/Screenshot_20250328_161851.jpg) 
+
 
 ## 📌 Tentang
 

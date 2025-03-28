@@ -9,7 +9,7 @@
 
 ## 📌 Tentang
 
-**Insta Follow Bot** adalah skrip otomatisasi untuk menambah dan menghapus pengikut di Instagram menggunakan sesi login yang valid. Skrip ini memungkinkan pengguna untuk:
+**Insta Follow Bot** adalah skrip otomatisasi untuk menambah folowers dan menghapus pengikut di Instagram menggunakan sesi login yang valid. Skrip ini memungkinkan pengguna untuk:
 
 ✅ Auto-followers - Spam follow akun populer 
 ✅ Auto-unfollow - akun populer  
